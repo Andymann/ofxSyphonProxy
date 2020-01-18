@@ -1,1 +1,1 @@
-# ofSyphonProxy
+# ofxSyphonProxy
