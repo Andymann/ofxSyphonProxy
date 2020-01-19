@@ -7,7 +7,7 @@ const string TITLE = "ofxSyphonProxy";
 void ofApp::setup(){
     ofSetWindowTitle( TITLE );
     ofSetEscapeQuitsApp(false);
-    ofSetWindowShape(800, 600);
+    ofSetWindowShape(512, 384);
     ofSetFrameRate(30);
     ofBackground(0,0,0);
     mainOutputSyphonServer.setName("ofxSyphonProxy");
@@ -83,6 +83,8 @@ void ofApp::draw(){
     ofDrawBitmapString("Press SPACE key to cycle through all Syphon servers.", ofPoint(20, 30));
     ofDrawBitmapString("Press 1 to set windowsize to 1024 * 768.", ofPoint(20, 45));
     ofDrawBitmapString("Press 2 to set windowsize to 512 * 384.", ofPoint(20, 60));
+    
+    ofDrawBitmapString("Output resolution is " + ofToString(ofGetWidth()) + "*" + ofToString(ofGetHeight()), ofPoint(20, 100));
 }
 
 //--------------------------------------------------------------
