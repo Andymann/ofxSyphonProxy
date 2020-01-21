@@ -1,1 +1,3 @@
+ofxGLWarper
+ofxOpenCv
 ofxSyphon

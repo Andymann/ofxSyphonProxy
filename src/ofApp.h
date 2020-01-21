@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxSyphon.h"
+#include "ofxGLWarper.h"
 
 class ofApp : public ofBaseApp{
 
@@ -30,5 +31,7 @@ class ofApp : public ofBaseApp{
         ofxSyphonServerDirectory dir;
         ofxSyphonClient client;
         int dirIdx;
+    
+    ofxGLWarper warper;
 		
 };

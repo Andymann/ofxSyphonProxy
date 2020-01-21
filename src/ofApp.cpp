@@ -1,14 +1,16 @@
 #include "ofApp.h"
 
 const string TITLE = "ofxSyphonProxy";
-
+const int FRAMERATE= 30;
+const string FILENAME = "ofxSyphonProxySettings.xml";
+bool bInfo = true;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofSetWindowTitle( TITLE );
     ofSetEscapeQuitsApp(false);
     ofSetWindowShape(512, 384);
-    ofSetFrameRate(30);
+    ofSetFrameRate(FRAMERATE);
     ofBackground(0,0,0);
     mainOutputSyphonServer.setName("ofxSyphonProxy");
 
@@ -24,6 +26,13 @@ void ofApp::setup(){
     ofAddListener(dir.events.serverRetired, this, &ofApp::serverRetired);
 
     dirIdx = -1;
+    
+    warper.setup(10, 10, ofGetWidth()-20, ofGetHeight()-20);
+    warper.activate();
+    
+    ofBackground(255, 0, 0);
+    warper.drawSettings.bDrawRectangle = true;
+    warper.load( FILENAME );
     
 }
 
@@ -65,26 +74,36 @@ void ofApp::draw(){
     ofColor(255, 255, 255, 255);
     ofEnableAlphaBlending();
 
+    warper.begin();
     if(dir.isValidIndex(dirIdx))
         client.draw(0, 0, ofGetWidth(), ofGetHeight() );
-
+    warper.end();
+    
     mainOutputSyphonServer.publishScreen();
     
-    ofRectangle rect;
-    rect.x = 10;
-    rect.y = 10;
-    rect.width = 500;
-    rect.height = 100;
     
-    ofSetColor(66,66,66);
-    ofDrawRectangle(rect);
-    
-    ofSetColor(255,255,255);
-    ofDrawBitmapString("Press SPACE key to cycle through all Syphon servers.", ofPoint(20, 30));
-    ofDrawBitmapString("Press 1 to set windowsize to 1024 * 768.", ofPoint(20, 45));
-    ofDrawBitmapString("Press 2 to set windowsize to 512 * 384.", ofPoint(20, 60));
-    
-    ofDrawBitmapString("Output resolution is " + ofToString(ofGetWidth()) + "*" + ofToString(ofGetHeight()), ofPoint(20, 100));
+    if(bInfo){
+        ofRectangle rect;
+        rect.x = 6;
+        rect.y = 10;
+        rect.width = ofGetWidth()-12;
+        rect.height = 180;
+        
+        ofSetColor(66,66,66);
+        ofDrawRectangle(rect);
+        
+        ofSetColor(255,255,255);
+        ofDrawBitmapString("Press SPACE key to cycle through all Syphon servers.", ofPoint(20, 30));
+        ofDrawBitmapString("Press 1 to set resolution to 1024 * 768.", ofPoint(20, 45));
+        ofDrawBitmapString("Press 2 to set resolution to 512 * 384.", ofPoint(20, 60));
+        
+        ofDrawBitmapString("Press 'w' to toggle warping.", ofPoint(20, 90));
+        ofDrawBitmapString("Press 's' to save warping.", ofPoint(20, 105));
+        
+        ofDrawBitmapString("Press 'i' to toggle this info.", ofPoint(20, 135));
+        
+        ofDrawBitmapString("Output resolution is " + ofToString(ofGetWidth()) + "*" + ofToString(ofGetHeight()) + ". Framerate is " + ofToString(FRAMERATE) + "fps.", ofPoint(20, 165));
+    }
 }
 
 //--------------------------------------------------------------
@@ -138,6 +157,20 @@ void ofApp::keyReleased(int key){
         ofSetWindowShape(512, 384);
     }else if(key=='3'){
         ofSetWindowShape(256, 192);
+    }else if(key=='w'){
+        if(warper.isActive()){
+            warper.deactivate();
+        }else{
+            warper.activate();
+        }
+    }else if(key=='i'){
+        if(bInfo){
+            bInfo = false;
+        }else{
+            bInfo=true;
+        }
+    }else if(key=='s'){
+        warper.save( FILENAME );
     }
 }
 
