@@ -4,12 +4,16 @@ const string TITLE = "ofxSyphonProxy";
 const int FRAMERATE= 30;
 const string FILENAME = "ofxSyphonProxySettings.xml";
 bool bInfo = true;
-
+bool bFullScreen =false;
+int iCacheHeight;
+int iCacheWidth;
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofSetWindowTitle( TITLE );
     ofSetEscapeQuitsApp(false);
     ofSetWindowShape(512, 384);
+    iCacheWidth=512;
+    iCacheHeight=384;
     ofSetFrameRate(FRAMERATE);
     ofBackground(0,0,0);
     mainOutputSyphonServer.setName("ofxSyphonProxy");
@@ -30,11 +34,13 @@ void ofApp::setup(){
     warper.setup(10, 10, ofGetWidth()-20, ofGetHeight()-20);
     warper.activate();
     
+    
     ofBackground(255, 0, 0);
     warper.drawSettings.bDrawRectangle = true;
     warper.load( FILENAME );
     
 }
+
 
 
 //these are our directory's callbacks
@@ -43,7 +49,12 @@ void ofApp::serverAnnounced(ofxSyphonServerDirectoryEventArgs &arg)
     for( auto& dir : arg.servers ){
         ofLogNotice("ofxSyphonServerDirectory Server Announced")<<" Server Name: "<<dir.serverName <<" | App Name: "<<dir.appName;
     }
+    
     dirIdx = 0;
+    
+    if(dir.size()>=2){
+        nextSyphon();
+    }
 }
 
 void ofApp::serverUpdated(ofxSyphonServerDirectoryEventArgs &arg)
@@ -66,6 +77,43 @@ void ofApp::serverRetired(ofxSyphonServerDirectoryEventArgs &arg)
 //--------------------------------------------------------------
 void ofApp::update(){
 
+}
+
+void ofApp::nextSyphon(){
+    if (dir.size() > 1) /*Because we are already 1*/{
+        dirIdx++;
+        bool bShowingSelf=true;
+        
+        while (bShowingSelf){
+            if(dirIdx > dir.size() - 1)
+            dirIdx = 0;
+            
+            client.set(dir.getDescription(dirIdx));
+            string serverName = client.getServerName();
+            string appName = client.getApplicationName();
+            
+            
+            if(serverName != TITLE ){
+                bShowingSelf=false;
+                
+                if(serverName == ""){
+                    serverName = "null";
+                }
+                if(appName == ""){
+                    appName = "null";
+                }
+                
+                ofSetWindowTitle(serverName + ":" + appName);
+            }else{
+                //We do not want to feed our own Syphon stream back to ourselves.
+                //ofLogNotice("Syphon Feedback. Selecting next");
+                dirIdx++;
+            }
+        }
+        
+    }else{
+        ofSetWindowTitle("No Server");
+    }
 }
 
 //--------------------------------------------------------------
@@ -96,9 +144,11 @@ void ofApp::draw(){
         ofDrawBitmapString("Press SPACE key to cycle through all Syphon servers.", ofPoint(20, 30));
         ofDrawBitmapString("Press 1 to set resolution to 1024 * 768.", ofPoint(20, 45));
         ofDrawBitmapString("Press 2 to set resolution to 512 * 384.", ofPoint(20, 60));
+        ofDrawBitmapString("Press 'f' to toggle fullscreen.", ofPoint(20, 75));
         
         ofDrawBitmapString("Press 'w' to toggle warping.", ofPoint(20, 90));
         ofDrawBitmapString("Press 's' to save warping.", ofPoint(20, 105));
+        ofDrawBitmapString("Press 'R' to reset warping.", ofPoint(20, 120));
         
         ofDrawBitmapString("Press 'i' to toggle this info.", ofPoint(20, 135));
         
@@ -114,43 +164,7 @@ void ofApp::keyPressed(int key){
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     if(key==' '){
-        if (dir.size() > 1) //Because we are already 1
-        {
-            dirIdx++;
-            bool bShowingSelf=true;
-            
-            while (bShowingSelf){
-                if(dirIdx > dir.size() - 1)
-                dirIdx = 0;
-                
-                client.set(dir.getDescription(dirIdx));
-                string serverName = client.getServerName();
-                string appName = client.getApplicationName();
-                
-                
-                if(serverName != TITLE ){
-                    bShowingSelf=false;
-                    
-                    if(serverName == ""){
-                        serverName = "null";
-                    }
-                    if(appName == ""){
-                        appName = "null";
-                    }
-                    
-                    ofSetWindowTitle(serverName + ":" + appName);
-                }else{
-                    //We do not want to feed our own Syphon stream back to ourselves.
-                    //ofLogNotice("Syphon Feedback. Selecting next");
-                    dirIdx++;
-                }
-            }
-            
-        }
-        else
-        {
-            ofSetWindowTitle("No Server");
-        }
+        nextSyphon();
     }else if(key=='1'){
         ofSetWindowShape(1024, 768);
     }else if(key=='2'){
@@ -171,6 +185,40 @@ void ofApp::keyReleased(int key){
         }
     }else if(key=='s'){
         warper.save( FILENAME );
+    }else if(key=='f'){
+        
+        bool bActive = warper.isActive();
+        
+        float fx_tl = warper.getCorner(ofxGLWarper::TOP_LEFT).x/ofGetWidth();
+        float fy_tl = warper.getCorner(ofxGLWarper::TOP_LEFT).y/ofGetHeight();
+        float fx_tr = warper.getCorner(ofxGLWarper::TOP_RIGHT).x/ofGetWidth();
+        float fy_tr = warper.getCorner(ofxGLWarper::TOP_RIGHT).y/ofGetHeight();
+        float fx_br = warper.getCorner(ofxGLWarper::BOTTOM_RIGHT).x/ofGetWidth();
+        float fy_br = warper.getCorner(ofxGLWarper::BOTTOM_RIGHT).y/ofGetHeight();
+        float fx_bl = warper.getCorner(ofxGLWarper::BOTTOM_LEFT).x/ofGetWidth();
+        float fy_bl = warper.getCorner(ofxGLWarper::BOTTOM_LEFT).y/ofGetHeight();
+        
+        bFullScreen = !bFullScreen;
+        ofSetFullscreen(bFullScreen);
+        
+        warper.setup(10, 10, ofGetWidth()-20, ofGetHeight()-20);
+        if(bActive){
+            warper.activate();
+        }else{
+            warper.deactivate();
+        }
+        warper.setCorner(ofxGLWarper::TOP_LEFT, glm::vec2(fx_tl*ofGetWidth(), fy_tl*ofGetHeight()));
+        warper.setCorner(ofxGLWarper::TOP_RIGHT, glm::vec2(fx_tr*ofGetWidth(), fy_tr*ofGetHeight()));
+        warper.setCorner(ofxGLWarper::BOTTOM_RIGHT, glm::vec2(fx_br*ofGetWidth(), fy_br*ofGetHeight()));
+        warper.setCorner(ofxGLWarper::BOTTOM_LEFT, glm::vec2(fx_bl*ofGetWidth(), fy_bl*ofGetHeight()));
+    
+    }else if(key=='R'){
+        warper.setCorner(ofxGLWarper::TOP_LEFT, glm::vec2(.25*ofGetWidth(), .75*ofGetHeight()));
+        warper.setCorner(ofxGLWarper::TOP_RIGHT, glm::vec2(.75*ofGetWidth(), .75*ofGetHeight()));
+        warper.setCorner(ofxGLWarper::BOTTOM_RIGHT, glm::vec2(.75*ofGetWidth(), .25*ofGetHeight()));
+        warper.setCorner(ofxGLWarper::BOTTOM_LEFT, glm::vec2(.25*ofGetWidth(), .25*ofGetHeight()));
+        warper.activate();
+        
     }
 }
 

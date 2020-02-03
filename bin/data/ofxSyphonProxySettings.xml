@@ -1,20 +1,20 @@
 <?xml version="1.0"?>
 <corners>
 	<corner>
-		<x>139.168</x>
-		<y>48.1055</y>
+		<x>57.4375</x>
+		<y>56.5352</y>
 	</corner>
 	<corner>
-		<x>381.793</x>
-		<y>75.7695</y>
+		<x>425.297</x>
+		<y>88.4766</y>
 	</corner>
 	<corner>
-		<x>383.359</x>
-		<y>288.84</y>
+		<x>379.164</x>
+		<y>284.598</y>
 	</corner>
 	<corner>
-		<x>45.3086</x>
-		<y>222.934</y>
+		<x>117.438</x>
+		<y>320.266</y>
 	</corner>
 	<active>0</active>
 </corners>

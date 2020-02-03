@@ -27,6 +27,7 @@ class ofApp : public ofBaseApp{
         void serverUpdated(ofxSyphonServerDirectoryEventArgs &args);
         void serverRetired(ofxSyphonServerDirectoryEventArgs &arg);
     
+    void nextSyphon();
         ofxSyphonServer mainOutputSyphonServer;
         ofxSyphonServerDirectory dir;
         ofxSyphonClient client;
