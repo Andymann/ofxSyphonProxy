@@ -3,6 +3,11 @@
 #include "ofMain.h"
 #include "ofxSyphon.h"
 #include "ofxGLWarper.h"
+#include "ofxNDISender.h"
+#include "ofxNDISendStream.h"
+#include "ofxBonjour.h"
+#include "ofxTCPServer.h"
+#include "ofxTCPClient.h"
 
 class ofApp : public ofBaseApp{
 
@@ -27,12 +32,30 @@ class ofApp : public ofBaseApp{
         void serverUpdated(ofxSyphonServerDirectoryEventArgs &args);
         void serverRetired(ofxSyphonServerDirectoryEventArgs &arg);
     
-    void nextSyphon();
+        void nextSyphon();
+        void addWarper();
+        void removeWarper();
+        void nextWarper();
+    
         ofxSyphonServer mainOutputSyphonServer;
         ofxSyphonServerDirectory dir;
         ofxSyphonClient client;
         int dirIdx;
     
-    ofxGLWarper warper;
-		
-};
+    ofxNDISender sender_;
+    ofxNDISendVideo video_;
+    
+    
+    private:
+        //ofxBonjourBrowser browser;
+        ofxBonjourPublisher publisher;
+        /*
+        class NotificationReceiver : public ofxBonjourBrowserFoundNotificationReceiverInterface {
+            static const string LogTag;
+            
+            virtual void foundService(const string &type, const string &name, const string &ip, const string &domain) {
+                ofLogVerbose(LogTag) << "Found Device: " << type << ", " << name << "@" << ip << " in " << domain;
+            }
+        } receiver;
+         */
+    };

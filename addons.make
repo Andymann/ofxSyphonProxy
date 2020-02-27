@@ -1,3 +1,6 @@
+ofxBonjour
 ofxGLWarper
+ofxNDI
+ofxNetwork
 ofxOpenCv
 ofxSyphon

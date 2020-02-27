@@ -29,6 +29,24 @@
 			<key>requirement</key>
 			<string>identifier libfmodex and certificate leaf = H"8d75059b66a8bfc22feeab6b7c4eb0fa12404a1c"</string>
 		</dict>
+		<key>MacOS/Syphon.framework</key>
+		<dict>
+			<key>cdhash</key>
+			<data>
+			Xwy9w3CUsXz1Fz1KcG/UIx4Bm7E=
+			</data>
+			<key>requirement</key>
+			<string>cdhash H"7f60d494ebf10f750c2b08507d599dcd169cb27f" or cdhash H"5f0cbdc37094b17cf5173d4a706fd4231e019bb1"</string>
+		</dict>
+		<key>MacOS/libndi.4.dylib</key>
+		<dict>
+			<key>cdhash</key>
+			<data>
+			NNCT6362SPiPmQzXYKHh41yDBkY=
+			</data>
+			<key>requirement</key>
+			<string>cdhash H"2d78671e2a4c5c5d7ba3389e16cf93a593c0986a" or cdhash H"34d093eb7eb648f88f990cd760a1e1e35c830646"</string>
+		</dict>
 		<key>Resources/icon-debug.icns</key>
 		<dict>
 			<key>hash</key>
