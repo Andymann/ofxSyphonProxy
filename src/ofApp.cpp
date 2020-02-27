@@ -158,7 +158,7 @@ void ofApp::nextWarper(){
 
 void ofApp::nextSyphon(){
     int iActiveIndex = -1;
-    for(int i=0; i<MAXWARPER;i++){
+    for(int i=0; i<vecWarp.size();i++){
         if(vecWarp.at(i).isActive()){
             iActiveIndex=i;
             break;
