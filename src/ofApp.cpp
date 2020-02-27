@@ -11,12 +11,10 @@ int iCacheHeight;
 int iCacheWidth;
 
 std::vector<ofxGLWarper> vecWarp;
-
+std::vector<ofxSyphonClient> vecClient;
 //--------------------------------------------------------------
 void ofApp::setup(){
         
-    
-    
     ofSetWindowTitle( TITLE );
     ofSetEscapeQuitsApp(false);
     ofSetWindowShape(512, 384);
@@ -28,8 +26,9 @@ void ofApp::setup(){
     
     //setup our directory
     dir.setup();
+    
     //setup our client
-    client.setup();
+    //client.setup();
 
     //register for our directory's callbacks
     ofAddListener(dir.events.serverAnnounced, this, &ofApp::serverAnnounced);
@@ -43,6 +42,7 @@ void ofApp::setup(){
     
     //----Den ersten immer
     ofApp::addWarper();
+    
     for(int i=1; i<MAXWARPER; i++){
         if(ofFile().doesFileExist("ofxSyphonProxySettings_" + ofToString(i) +".xml")){
             ofApp::addWarper();
@@ -114,6 +114,7 @@ void ofApp::removeWarper(){
     if(vecWarp.size()>1){
         ofFile().removeFile("ofxSyphonProxySettings_" + ofToString(vecWarp.size()-1) +".xml");
         vecWarp.erase(vecWarp.end()-1);
+        vecClient.erase(vecClient.end()-1);
     }
 }
 
@@ -128,6 +129,9 @@ void ofApp::addWarper(){
         vecWarp.back().activate();
         vecWarp.back().drawSettings.bDrawRectangle = true;
         vecWarp.back().load( "ofxSyphonProxySettings_" + ofToString(vecWarp.size()-1) +".xml" );
+        
+        vecClient.push_back( ofxSyphonClient() );
+        vecClient.back().setup();
         
     }
 }
@@ -153,38 +157,51 @@ void ofApp::nextWarper(){
 }
 
 void ofApp::nextSyphon(){
-    if (dir.size() > 1) /*Because we are already 1*/{
-        dirIdx++;
-        bool bShowingSelf=true;
-        
-        while (bShowingSelf){
-            if(dirIdx > dir.size() - 1)
-            dirIdx = 0;
-            
-            client.set(dir.getDescription(dirIdx));
-            string serverName = client.getServerName();
-            string appName = client.getApplicationName();
-            
-            if(serverName != TITLE ){
-                bShowingSelf=false;
-                
-                if(serverName == ""){
-                    serverName = "null";
-                }
-                if(appName == ""){
-                    appName = "null";
-                }
-                
-                ofSetWindowTitle(serverName + ":" + appName);
-            }else{
-                //We do not want to feed our own Syphon stream back to ourselves.
-                //ofLogNotice("Syphon Feedback. Selecting next");
-                dirIdx++;
-            }
+    int iActiveIndex = -1;
+    for(int i=0; i<MAXWARPER;i++){
+        if(vecWarp.at(i).isActive()){
+            iActiveIndex=i;
+            break;
         }
-        
-    }else{
-        ofSetWindowTitle("No Server");
+    }
+    
+    if(iActiveIndex!=-1){
+        if (dir.size() > 1) /*Because we are already 1*/{
+            dirIdx++;
+            bool bShowingSelf=true;
+            
+            while (bShowingSelf){
+                if(dirIdx > dir.size() - 1)
+                dirIdx = 0;
+                
+                //client.set(dir.getDescription(dirIdx));
+                //string serverName = client.getServerName();
+                //string appName = client.getApplicationName();
+                vecClient.at(iActiveIndex).set(dir.getDescription(dirIdx));
+                string serverName = vecClient.at(iActiveIndex).getServerName();
+                string appName = vecClient.at(iActiveIndex).getApplicationName();
+                
+                if(serverName != TITLE ){
+                    bShowingSelf=false;
+                    
+                    if(serverName == ""){
+                        serverName = "null";
+                    }
+                    if(appName == ""){
+                        appName = "null";
+                    }
+                    
+                    //ofSetWindowTitle(serverName + ":" + appName);
+                }else{
+                    //We do not want to feed our own Syphon stream back to ourselves.
+                    //ofLogNotice("Syphon Feedback. Selecting next");
+                    dirIdx++;
+                }
+            }
+            
+        }else{
+            //ofSetWindowTitle("No Server");
+        }
     }
 }
 
@@ -197,7 +214,8 @@ void ofApp::draw(){
     for(int i=0; i<vecWarp.size();i++){
         vecWarp.at(i).begin();
         if(dir.isValidIndex(dirIdx)){
-            client.draw(0, 0, ofGetWidth(), ofGetHeight() );
+            //client.draw(0, 0, ofGetWidth(), ofGetHeight() );
+            vecClient.at(i).draw(0, 0, ofGetWidth(), ofGetHeight() );
         }
         vecWarp.at(i).end();
     }

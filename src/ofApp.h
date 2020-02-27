@@ -39,7 +39,7 @@ class ofApp : public ofBaseApp{
     
         ofxSyphonServer mainOutputSyphonServer;
         ofxSyphonServerDirectory dir;
-        ofxSyphonClient client;
+        //ofxSyphonClient client;
         int dirIdx;
     
     ofxNDISender sender_;
