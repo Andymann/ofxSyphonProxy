@@ -48,11 +48,39 @@ void ofApp::setup(){
             ofApp::addWarper();
         }
     }
+
     
+     //----send NDI
     if(sender_.setup("ofxNDISender example")) {
         video_.setup(sender_);
         video_.setAsync(true);
     }
+    
+    
+    /*
+    //----receive NDI
+    auto findSource = [](const string &name_or_url) {
+        auto sources = ofxNDI::listSources();
+        if(name_or_url == "") {
+            return make_pair(ofxNDI::Source(), false);
+        }
+        auto found = find_if(begin(sources), end(sources), [name_or_url](const ofxNDI::Source &s) {
+            return ofIsStringInString(s.p_ndi_name, name_or_url) || ofIsStringInString(s.p_url_address, name_or_url);
+        });
+        if(found == end(sources)) {
+            ofLogWarning("ofxNDI") << "no NDI source found by string:" << name_or_url;
+            return make_pair(ofxNDI::Source(), false);
+        }
+        return make_pair(*found, true);
+    };
+    string name_or_url = "";    // Specify name or address of expected NDI source. In case of blank or not found, receiver will grab default(which is found first) source.
+    auto result = findSource(name_or_url);
+    if(result.second ? receiver_.setup(result.first) : receiver_.setup()) {
+        video_.setup(receiver_);
+    }
+    
+    */
+    
     
     
     
@@ -107,7 +135,14 @@ void ofApp::serverRetired(ofxSyphonServerDirectoryEventArgs &arg)
 
 //--------------------------------------------------------------
 void ofApp::update(){
-
+    /*
+    if(receiver_.isConnected()) {
+        video_.update();
+        if(video_.isFrameNew()) {
+            video_.decodeTo(pixels_);
+        }
+    }
+     */
 }
 
 void ofApp::removeWarper(){
@@ -125,11 +160,18 @@ void ofApp::addWarper(){
         }
         
         vecWarp.push_back(ofxGLWarper());
-        vecWarp.back().setup(10, 10, ofGetWidth()-20, ofGetHeight()-20);
+        vecWarp.back().setup(5, 5, ofGetWidth()-10, ofGetHeight()-10);
         vecWarp.back().activate();
         vecWarp.back().drawSettings.bDrawRectangle = true;
-        vecWarp.back().load( "ofxSyphonProxySettings_" + ofToString(vecWarp.size()-1) +".xml" );
         
+        vecWarp.back().setCorner(ofxGLWarper::BOTTOM_LEFT, glm::vec2(.25*ofGetWidth(), .75*ofGetHeight()));
+        vecWarp.back().setCorner(ofxGLWarper::BOTTOM_RIGHT, glm::vec2(.75*ofGetWidth(), .75*ofGetHeight()));
+        vecWarp.back().setCorner(ofxGLWarper::TOP_RIGHT, glm::vec2(.75*ofGetWidth(), .25*ofGetHeight()));
+        vecWarp.back().setCorner(ofxGLWarper::TOP_LEFT, glm::vec2(.25*ofGetWidth(), .25*ofGetHeight()));
+        
+        
+        vecWarp.back().load( "ofxSyphonProxySettings_" + ofToString(vecWarp.size()-1) +".xml" );
+          
         vecClient.push_back( ofxSyphonClient() );
         vecClient.back().setup();
         
@@ -174,9 +216,6 @@ void ofApp::nextSyphon(){
                 if(dirIdx > dir.size() - 1)
                 dirIdx = 0;
                 
-                //client.set(dir.getDescription(dirIdx));
-                //string serverName = client.getServerName();
-                //string appName = client.getApplicationName();
                 vecClient.at(iActiveIndex).set(dir.getDescription(dirIdx));
                 string serverName = vecClient.at(iActiveIndex).getServerName();
                 string appName = vecClient.at(iActiveIndex).getApplicationName();
@@ -210,7 +249,13 @@ void ofApp::draw(){
     ofBackground(0, 0, 0);
     ofColor(255, 255, 255, 255);
     ofEnableAlphaBlending();
-    
+    /*
+    if(pixels_.isAllocated()) {
+        vecWarp.at(0).begin();
+            ofImage(pixels_).draw(0,0);
+        vecWarp.at(0).end();
+    }
+    */
     for(int i=0; i<vecWarp.size();i++){
         vecWarp.at(i).begin();
         if(dir.isValidIndex(dirIdx)){
@@ -239,8 +284,8 @@ void ofApp::draw(){
         ofDrawBitmapString("Press 2 to set resolution to 512 * 384.", ofPoint(20, 60));
         ofDrawBitmapString("Press 'f' to toggle fullscreen.", ofPoint(20, 75));
         
-        ofDrawBitmapString("Press 'w' to toggle warping.", ofPoint(20, 90));
-        ofDrawBitmapString("Press 'W' to deactive warping.", ofPoint(20, 105));
+        ofDrawBitmapString("Press 'w' to toggle and 'W' to deactivate warping.", ofPoint(20, 90));
+        //ofDrawBitmapString("Press 'W' to deactive warping.", ofPoint(20, 105));
         ofDrawBitmapString("Press 's' to save warping.", ofPoint(20, 120));
         ofDrawBitmapString("Press 'R' to reset warping.", ofPoint(20, 135));
         
@@ -310,7 +355,6 @@ void ofApp::keyReleased(int key){
             vecWarp.at(i).save( "ofxSyphonProxySettings_" + ofToString(i) +".xml" );
         }
     }else if(key=='f'){
-        
         
         bool bActive = vecWarp.at(0).isActive();
         float fx_tl = vecWarp.at(0).getCorner(ofxGLWarper::TOP_LEFT).x/ofGetWidth();

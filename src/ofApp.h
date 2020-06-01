@@ -5,6 +5,8 @@
 #include "ofxGLWarper.h"
 #include "ofxNDISender.h"
 #include "ofxNDISendStream.h"
+#include "ofxNDIReceiver.h"
+#include "ofxNDIRecvStream.h"
 #include "ofxBonjour.h"
 #include "ofxTCPServer.h"
 #include "ofxTCPClient.h"
@@ -45,6 +47,9 @@ class ofApp : public ofBaseApp{
     ofxNDISender sender_;
     ofxNDISendVideo video_;
     
+    //ofxNDIReceiver receiver_;
+    //ofxNDIRecvVideoFrameSync video_;
+    //ofPixels pixels_;
     
     private:
         //ofxBonjourBrowser browser;
